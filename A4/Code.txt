@@ -1,0 +1,1469 @@
+#Ameeth Kanawaday 4430
+#Assignment A4
+import sys
+from xml.dom import minidom
+from mpi4py import MPI
+import numpy
+import matplotlib.pyplot as plt; plt.rcdefaults()
+import numpy as np
+import matplotlib.pyplot as plt
+class NQueenProblem:
+    def __init__(self,boardSize):
+        self.size = boardSize
+	self.columns = []
+	self.placesChecked = 0
+        self.numBacktracks = 0
+
+    def chessBoard(self):
+        for row in range(0,8):
+	    for col in range(0,8):
+	        queenPos = queen.columns.index(row)
+	        if col == queenPos:
+		    print'|  Q  |-',
+	        else:
+		    print'|     |-',
+	    print('\n')
+
+    def place(self,startRow = 0):
+	if len(self.columns) == self.size:
+	    print('Solution found!\nSize of Chessboard :: '+str(self.size))
+	    print('Total number of positions checked :: '+str(self.placesChecked))
+	    print('Total number of backtracks :: '+str(self.numBacktracks))
+	    print('\n:: :: Row Positions :: ::')
+	    print(self.columns)
+
+	else:
+	    for row in range(startRow,self.size):
+		if self.checkPosition(len(self.columns),row) is True: 
+		    self.columns.append(row)
+		    self.placesChecked += 1
+		    return self.place()
+
+	    self.numBacktracks += 1
+	    return self.place(self.columns.pop()+1)
+
+    def checkPosition(self,col,row):
+	for positionedRow in self.columns:
+	    positionedCol = self.columns.index(positionedRow)
+	    if row == positionedRow or col == positionedCol:
+		return False
+	    elif row - col == positionedRow - positionedCol or row + col == positionedRow + positionedCol:
+		return False
+	return True
+
+if __name__ == "__main__":
+    rank = MPI.COMM_WORLD.Get_rank()
+    n = 8
+    Buffer = []
+    queen = NQueenProblem(n)
+    doc = minidom.parse('queenPosition.xml')
+
+    #Sending initial configuration
+    if rank == 0:
+        start = MPI.Wtime()
+     #Slave1
+        position = doc.getElementsByTagName("slave1")[0]
+        pos = int(position.firstChild.data)
+        print('Slave\'1 Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=100)
+
+        position = doc.getElementsByTagName("slave2")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=200)
+
+        position = doc.getElementsByTagName("slave3")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=300)
+
+        position = doc.getElementsByTagName("slave4")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=400)
+
+        position = doc.getElementsByTagName("slave5")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=500)
+
+        position = doc.getElementsByTagName("slave6")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=600)
+
+        position = doc.getElementsByTagName("slave7")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=700)
+
+        position = doc.getElementsByTagName("slave8")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=800)
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Parallel Configuration
+    if rank == 1:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=100)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=200)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=300)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=400)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=500)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=600)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=700)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=800)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Gathering and printing output
+    if rank == 0:
+
+        end = MPI.Wtime()
+        timeMaster = end-start
+        print('Time :: '+str(end-start))
+
+        target = open("TimeAnalysis", 'a')
+
+        target.write(str(end-start))
+        target.write("\n")
+
+        target.close()
+
+//eightQueenPlot_3.py
+import sys
+from xml.dom import minidom
+from mpi4py import MPI
+import numpy
+
+import matplotlib.pyplot as plt; plt.rcdefaults()
+import numpy as np
+import matplotlib.pyplot as plt
+
+class NQueenProblem:
+    def __init__(self,boardSize):
+        self.size = boardSize
+	self.columns = []
+	self.placesChecked = 0
+        self.numBacktracks = 0
+
+    def chessBoard(self):
+        for row in range(0,8):
+	    for col in range(0,8):
+	        queenPos = queen.columns.index(row)
+	        if col == queenPos:
+		    print'|  Q  |-',
+	        else:
+		    print'|     |-',
+	    print('\n')
+
+    def place(self,startRow = 0):
+	if len(self.columns) == self.size:
+	    print('Solution found!\nSize of Chessboard :: '+str(self.size))
+	    print('Total number of positions checked :: '+str(self.placesChecked))
+	    print('Total number of backtracks :: '+str(self.numBacktracks))
+	    print('\n:: :: Row Positions :: ::')
+	    print(self.columns)
+
+	else:
+	    for row in range(startRow,self.size):
+		if self.checkPosition(len(self.columns),row) is True: 
+		    self.columns.append(row)
+		    self.placesChecked += 1
+		    return self.place()
+
+	    self.numBacktracks += 1
+	    return self.place(self.columns.pop()+1)
+
+    def checkPosition(self,col,row):
+	for positionedRow in self.columns:
+	    positionedCol = self.columns.index(positionedRow)
+	    if row == positionedRow or col == positionedCol:
+		return False
+	    elif row - col == positionedRow - positionedCol or row + col == positionedRow + positionedCol:
+		return False
+	return True
+
+if __name__ == "__main__":
+    rank = MPI.COMM_WORLD.Get_rank()
+    n = 8
+    Buffer = []
+    queen = NQueenProblem(n)
+    doc = minidom.parse('queenPosition.xml')
+
+    #Sending initial configuration
+    if rank == 0:
+        start = MPI.Wtime()
+     #Slave1
+        position = doc.getElementsByTagName("slave1")[0]
+        pos = int(position.firstChild.data)
+        print('Slave\'1 Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=100)
+
+        position = doc.getElementsByTagName("slave2")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=200)
+
+        position = doc.getElementsByTagName("slave3")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=300)
+
+        position = doc.getElementsByTagName("slave4")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=400)
+
+        position = doc.getElementsByTagName("slave5")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=2,tag=500)
+
+        position = doc.getElementsByTagName("slave6")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=2,tag=600)
+
+        position = doc.getElementsByTagName("slave7")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=2,tag=700)
+
+        position = doc.getElementsByTagName("slave8")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=2,tag=800)
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Parallel Configuration
+    if rank == 1:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=100)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=200)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=300)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=400)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 2:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=500)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=600)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=700)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=800)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Gathering and printing output
+    if rank == 0:
+
+        end = MPI.Wtime()
+        timeMaster = end-start
+        print('Time :: '+str(end-start))
+
+        target = open("TimeAnalysis", 'a')
+
+        target.write(str(end-start))
+        target.write("\n")
+
+        target.close()
+
+//eightQueenPlot_4.py
+
+import sys
+from xml.dom import minidom
+from mpi4py import MPI
+import numpy
+
+import matplotlib.pyplot as plt; plt.rcdefaults()
+import numpy as np
+import matplotlib.pyplot as plt
+
+class NQueenProblem:
+    def __init__(self,boardSize):
+        self.size = boardSize
+	self.columns = []
+	self.placesChecked = 0
+        self.numBacktracks = 0
+
+    def chessBoard(self):
+        for row in range(0,8):
+	    for col in range(0,8):
+	        queenPos = queen.columns.index(row)
+	        if col == queenPos:
+		    print'|  Q  |-',
+	        else:
+		    print'|     |-',
+	    print('\n')
+
+    def place(self,startRow = 0):
+	if len(self.columns) == self.size:
+	    print('Solution found!\nSize of Chessboard :: '+str(self.size))
+	    print('Total number of positions checked :: '+str(self.placesChecked))
+	    print('Total number of backtracks :: '+str(self.numBacktracks))
+	    print('\n:: :: Row Positions :: ::')
+	    print(self.columns)
+
+	else:
+	    for row in range(startRow,self.size):
+		if self.checkPosition(len(self.columns),row) is True: 
+		    self.columns.append(row)
+		    self.placesChecked += 1
+		    return self.place()
+
+	    self.numBacktracks += 1
+	    return self.place(self.columns.pop()+1)
+
+    def checkPosition(self,col,row):
+	for positionedRow in self.columns:
+	    positionedCol = self.columns.index(positionedRow)
+	    if row == positionedRow or col == positionedCol:
+		return False
+	    elif row - col == positionedRow - positionedCol or row + col == positionedRow + positionedCol:
+		return False
+	return True
+
+if __name__ == "__main__":
+    rank = MPI.COMM_WORLD.Get_rank()
+    n = 8
+    Buffer = []
+    queen = NQueenProblem(n)
+    doc = minidom.parse('queenPosition.xml')
+
+    #Sending initial configuration
+    if rank == 0:
+        start = MPI.Wtime()
+     #Slave1
+        position = doc.getElementsByTagName("slave1")[0]
+        pos = int(position.firstChild.data)
+        print('Slave\'1 Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=100)
+
+        position = doc.getElementsByTagName("slave2")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=2,tag=200)
+
+        position = doc.getElementsByTagName("slave3")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=3,tag=300)
+
+        position = doc.getElementsByTagName("slave4")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=400)
+
+        position = doc.getElementsByTagName("slave5")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=2,tag=500)
+
+        position = doc.getElementsByTagName("slave6")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=3,tag=600)
+
+        position = doc.getElementsByTagName("slave7")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=700)
+
+        position = doc.getElementsByTagName("slave8")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=2,tag=800)
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Parallel Configuration
+    if rank == 1:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=100)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=400)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=700)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 2:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=200)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=500)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=800)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 3:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=300)
+        print('\n\n:: :: Rank 3 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=600)
+        print('\n\n:: :: Rank 3 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Gathering and printing output
+    if rank == 0:
+
+        end = MPI.Wtime()
+        timeMaster = end-start
+        print('Time :: '+str(end-start))
+
+        target = open("TimeAnalysis", 'a')
+
+        target.write(str(end-start))
+        target.write("\n")
+
+        target.close()
+
+//eightQueenPlot_5.py
+
+import sys
+from xml.dom import minidom
+from mpi4py import MPI
+import numpy
+
+import matplotlib.pyplot as plt; plt.rcdefaults()
+import numpy as np
+import matplotlib.pyplot as plt
+
+class NQueenProblem:
+    def __init__(self,boardSize):
+        self.size = boardSize
+	self.columns = []
+	self.placesChecked = 0
+        self.numBacktracks = 0
+
+    def chessBoard(self):
+        for row in range(0,8):
+	    for col in range(0,8):
+	        queenPos = queen.columns.index(row)
+	        if col == queenPos:
+		    print'|  Q  |-',
+	        else:
+		    print'|     |-',
+	    print('\n')
+
+    def place(self,startRow = 0):
+	if len(self.columns) == self.size:
+	    print('Solution found!\nSize of Chessboard :: '+str(self.size))
+	    print('Total number of positions checked :: '+str(self.placesChecked))
+	    print('Total number of backtracks :: '+str(self.numBacktracks))
+	    print('\n:: :: Row Positions :: ::')
+	    print(self.columns)
+
+	else:
+	    for row in range(startRow,self.size):
+		if self.checkPosition(len(self.columns),row) is True: 
+		    self.columns.append(row)
+		    self.placesChecked += 1
+		    return self.place()
+
+	    self.numBacktracks += 1
+	    return self.place(self.columns.pop()+1)
+
+    def checkPosition(self,col,row):
+	for positionedRow in self.columns:
+	    positionedCol = self.columns.index(positionedRow)
+	    if row == positionedRow or col == positionedCol:
+		return False
+	    elif row - col == positionedRow - positionedCol or row + col == positionedRow + positionedCol:
+		return False
+	return True
+
+if __name__ == "__main__":
+    rank = MPI.COMM_WORLD.Get_rank()
+    n = 8
+    Buffer = []
+    queen = NQueenProblem(n)
+    doc = minidom.parse('queenPosition.xml')
+
+    #Sending initial configuration
+    if rank == 0:
+        start = MPI.Wtime()
+     #Slave1
+        position = doc.getElementsByTagName("slave1")[0]
+        pos = int(position.firstChild.data)
+        print('Slave\'1 Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=100)
+
+        position = doc.getElementsByTagName("slave2")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=2,tag=200)
+
+        position = doc.getElementsByTagName("slave3")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=3,tag=300)
+
+        position = doc.getElementsByTagName("slave4")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=4,tag=400)
+
+        position = doc.getElementsByTagName("slave5")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=500)
+
+        position = doc.getElementsByTagName("slave6")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=2,tag=600)
+
+        position = doc.getElementsByTagName("slave7")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=3,tag=700)
+
+        position = doc.getElementsByTagName("slave8")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=4,tag=800)
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Parallel Configuration
+    if rank == 1:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=100)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=500)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 2:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=200)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=600)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 3:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=300)
+        print('\n\n:: :: Rank 3 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=700)
+        print('\n\n:: :: Rank 3 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 4:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=400)
+        print('\n\n:: :: Rank 4 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=800)
+        print('\n\n:: :: Rank 4 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Gathering and printing output
+    if rank == 0:
+
+        end = MPI.Wtime()
+        timeMaster = end-start
+        print('Time :: '+str(end-start))
+
+        target = open("TimeAnalysis", 'a')
+
+        target.write(str(end-start))
+        target.write("\n")
+
+        target.close()
+
+//eightQueenPlot_6.py
+import sys
+from xml.dom import minidom
+from mpi4py import MPI
+import numpy
+
+import matplotlib.pyplot as plt; plt.rcdefaults()
+import numpy as np
+import matplotlib.pyplot as plt
+
+class NQueenProblem:
+    def __init__(self,boardSize):
+        self.size = boardSize
+	self.columns = []
+	self.placesChecked = 0
+        self.numBacktracks = 0
+
+    def chessBoard(self):
+        for row in range(0,8):
+	    for col in range(0,8):
+	        queenPos = queen.columns.index(row)
+	        if col == queenPos:
+		    print'|  Q  |-',
+	        else:
+		    print'|     |-',
+	    print('\n')
+
+    def place(self,startRow = 0):
+	if len(self.columns) == self.size:
+	    print('Solution found!\nSize of Chessboard :: '+str(self.size))
+	    print('Total number of positions checked :: '+str(self.placesChecked))
+	    print('Total number of backtracks :: '+str(self.numBacktracks))
+	    print('\n:: :: Row Positions :: ::')
+	    print(self.columns)
+
+	else:
+	    for row in range(startRow,self.size):
+		if self.checkPosition(len(self.columns),row) is True: 
+		    self.columns.append(row)
+		    self.placesChecked += 1
+		    return self.place()
+
+	    self.numBacktracks += 1
+	    return self.place(self.columns.pop()+1)
+
+    def checkPosition(self,col,row):
+	for positionedRow in self.columns:
+	    positionedCol = self.columns.index(positionedRow)
+	    if row == positionedRow or col == positionedCol:
+		return False
+	    elif row - col == positionedRow - positionedCol or row + col == positionedRow + positionedCol:
+		return False
+	return True
+
+if __name__ == "__main__":
+    rank = MPI.COMM_WORLD.Get_rank()
+    n = 8
+    Buffer = []
+    queen = NQueenProblem(n)
+    doc = minidom.parse('queenPosition.xml')
+
+    #Sending initial configuration
+    if rank == 0:
+        start = MPI.Wtime()
+     #Slave1
+        position = doc.getElementsByTagName("slave1")[0]
+        pos = int(position.firstChild.data)
+        print('Slave\'1 Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=100)
+
+        position = doc.getElementsByTagName("slave2")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=2,tag=200)
+
+        position = doc.getElementsByTagName("slave3")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=3,tag=300)
+
+        position = doc.getElementsByTagName("slave4")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=4,tag=400)
+
+        position = doc.getElementsByTagName("slave5")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=5,tag=500)
+
+        position = doc.getElementsByTagName("slave6")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=600)
+
+        position = doc.getElementsByTagName("slave7")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=2,tag=700)
+
+        position = doc.getElementsByTagName("slave8")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=3,tag=800)
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Parallel Configuration
+    if rank == 1:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=100)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=600)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 2:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=200)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=700)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 3:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=300)
+        print('\n\n:: :: Rank 3 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=800)
+        print('\n\n:: :: Rank 3 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 4:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=400)
+        print('\n\n:: :: Rank 4 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 5:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=500)
+        print('\n\n:: :: Rank 5 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Gathering and printing output
+    if rank == 0:
+
+        end = MPI.Wtime()
+        timeMaster = end-start
+        print('Time :: '+str(end-start))
+
+        target = open("TimeAnalysis", 'a')
+
+        target.write(str(end-start))
+        target.write("\n")
+
+        target.close()
+
+//eightQueenPlot_7.py
+
+import sys
+from xml.dom import minidom
+from mpi4py import MPI
+import numpy
+
+import matplotlib.pyplot as plt; plt.rcdefaults()
+import numpy as np
+import matplotlib.pyplot as plt
+
+class NQueenProblem:
+    def __init__(self,boardSize):
+        self.size = boardSize
+	self.columns = []
+	self.placesChecked = 0
+        self.numBacktracks = 0
+
+    def chessBoard(self):
+        for row in range(0,8):
+	    for col in range(0,8):
+	        queenPos = queen.columns.index(row)
+	        if col == queenPos:
+		    print'|  Q  |-',
+	        else:
+		    print'|     |-',
+	    print('\n')
+
+    def place(self,startRow = 0):
+	if len(self.columns) == self.size:
+	    print('Solution found!\nSize of Chessboard :: '+str(self.size))
+	    print('Total number of positions checked :: '+str(self.placesChecked))
+	    print('Total number of backtracks :: '+str(self.numBacktracks))
+	    print('\n:: :: Row Positions :: ::')
+	    print(self.columns)
+
+	else:
+	    for row in range(startRow,self.size):
+		if self.checkPosition(len(self.columns),row) is True: 
+		    self.columns.append(row)
+		    self.placesChecked += 1
+		    return self.place()
+
+	    self.numBacktracks += 1
+	    return self.place(self.columns.pop()+1)
+
+    def checkPosition(self,col,row):
+	for positionedRow in self.columns:
+	    positionedCol = self.columns.index(positionedRow)
+	    if row == positionedRow or col == positionedCol:
+		return False
+	    elif row - col == positionedRow - positionedCol or row + col == positionedRow + positionedCol:
+		return False
+	return True
+
+if __name__ == "__main__":
+    rank = MPI.COMM_WORLD.Get_rank()
+    n = 8
+    Buffer = []
+    queen = NQueenProblem(n)
+    doc = minidom.parse('queenPosition.xml')
+
+    #Sending initial configuration
+    if rank == 0:
+        start = MPI.Wtime()
+     #Slave1
+        position = doc.getElementsByTagName("slave1")[0]
+        pos = int(position.firstChild.data)
+        print('Slave\'1 Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=100)
+
+        position = doc.getElementsByTagName("slave2")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=2,tag=200)
+
+        position = doc.getElementsByTagName("slave3")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=3,tag=300)
+
+        position = doc.getElementsByTagName("slave4")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=4,tag=400)
+
+        position = doc.getElementsByTagName("slave5")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=5,tag=500)
+
+        position = doc.getElementsByTagName("slave6")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=6,tag=600)
+
+        position = doc.getElementsByTagName("slave7")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=700)
+
+        position = doc.getElementsByTagName("slave8")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=2,tag=800)
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Parallel Configuration
+    if rank == 1:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=100)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=700)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 2:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=200)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=800)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 3:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=300)
+        print('\n\n:: :: Rank 3 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 4:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=400)
+        print('\n\n:: :: Rank 4 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 5:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=500)
+        print('\n\n:: :: Rank 5 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 6:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=600)
+        print('\n\n:: :: Rank 6 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Gathering and printing output
+    if rank == 0:
+
+        end = MPI.Wtime()
+        timeMaster = end-start
+        print('Time :: '+str(end-start))
+
+        target = open("TimeAnalysis", 'a')
+
+        target.write(str(end-start))
+        target.write("\n")
+
+        target.close()
+
+//eightQueenPlot_8.py
+
+import sys
+from xml.dom import minidom
+from mpi4py import MPI
+import numpy
+
+import matplotlib.pyplot as plt; plt.rcdefaults()
+import numpy as np
+import matplotlib.pyplot as plt
+
+class NQueenProblem:
+    def __init__(self,boardSize):
+        self.size = boardSize
+	self.columns = []
+	self.placesChecked = 0
+        self.numBacktracks = 0
+
+    def chessBoard(self):
+        for row in range(0,8):
+	    for col in range(0,8):
+	        queenPos = queen.columns.index(row)
+	        if col == queenPos:
+		    print'|  Q  |-',
+	        else:
+		    print'|     |-',
+	    print('\n')
+
+    def place(self,startRow = 0):
+	if len(self.columns) == self.size:
+	    print('Solution found!\nSize of Chessboard :: '+str(self.size))
+	    print('Total number of positions checked :: '+str(self.placesChecked))
+	    print('Total number of backtracks :: '+str(self.numBacktracks))
+	    print('\n:: :: Row Positions :: ::')
+	    print(self.columns)
+
+	else:
+	    for row in range(startRow,self.size):
+		if self.checkPosition(len(self.columns),row) is True: 
+		    self.columns.append(row)
+		    self.placesChecked += 1
+		    return self.place()
+
+	    self.numBacktracks += 1
+	    return self.place(self.columns.pop()+1)
+
+    def checkPosition(self,col,row):
+	for positionedRow in self.columns:
+	    positionedCol = self.columns.index(positionedRow)
+	    if row == positionedRow or col == positionedCol:
+		return False
+	    elif row - col == positionedRow - positionedCol or row + col == positionedRow + positionedCol:
+		return False
+	return True
+
+if __name__ == "__main__":
+    rank = MPI.COMM_WORLD.Get_rank()
+    n = 8
+    Buffer = []
+    queen = NQueenProblem(n)
+    doc = minidom.parse('queenPosition.xml')
+
+    #Sending initial configuration
+    if rank == 0:
+        start = MPI.Wtime()
+     #Slave1
+        position = doc.getElementsByTagName("slave1")[0]
+        pos = int(position.firstChild.data)
+        print('Slave\'1 Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=100)
+
+        position = doc.getElementsByTagName("slave2")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=2,tag=200)
+
+        position = doc.getElementsByTagName("slave3")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=3,tag=300)
+
+        position = doc.getElementsByTagName("slave4")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=4,tag=400)
+
+        position = doc.getElementsByTagName("slave5")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=5,tag=500)
+
+        position = doc.getElementsByTagName("slave6")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=6,tag=600)
+
+        position = doc.getElementsByTagName("slave7")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=7,tag=700)
+
+        position = doc.getElementsByTagName("slave8")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=800)
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Parallel Configuration
+    if rank == 1:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=100)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=800)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 2:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=200)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 3:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=300)
+        print('\n\n:: :: Rank 3 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 4:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=400)
+        print('\n\n:: :: Rank 4 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 5:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=500)
+        print('\n\n:: :: Rank 5 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 6:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=600)
+        print('\n\n:: :: Rank 6 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 7:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=700)
+        print('\n\n:: :: Rank 7 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Gathering and printing output
+    if rank == 0:
+
+        end = MPI.Wtime()
+        timeMaster = end-start
+        print('Time :: '+str(end-start))
+
+        target = open("TimeAnalysis", 'a')
+
+        target.write(str(end-start))
+        target.write("\n")
+
+        target.close()
+
+//eightQueenPlot_9.py
+
+import sys
+from xml.dom import minidom
+from mpi4py import MPI
+import numpy
+
+import matplotlib.pyplot as plt; plt.rcdefaults()
+import numpy as np
+import matplotlib.pyplot as plt
+
+class NQueenProblem:
+    def __init__(self,boardSize):
+        self.size = boardSize
+	self.columns = []
+	self.placesChecked = 0
+        self.numBacktracks = 0
+
+    def chessBoard(self):
+        for row in range(0,8):
+	    for col in range(0,8):
+	        queenPos = queen.columns.index(row)
+	        if col == queenPos:
+		    print'|  Q  |-',
+	        else:
+		    print'|     |-',
+	    print('\n')
+
+    def place(self,startRow = 0):
+	if len(self.columns) == self.size:
+	    print('Solution found!\nSize of Chessboard :: '+str(self.size))
+	    print('Total number of positions checked :: '+str(self.placesChecked))
+	    print('Total number of backtracks :: '+str(self.numBacktracks))
+	    print('\n:: :: Row Positions :: ::')
+	    print(self.columns)
+
+	else:
+	    for row in range(startRow,self.size):
+		if self.checkPosition(len(self.columns),row) is True: 
+		    self.columns.append(row)
+		    self.placesChecked += 1
+		    return self.place()
+
+	    self.numBacktracks += 1
+	    return self.place(self.columns.pop()+1)
+
+    def checkPosition(self,col,row):
+	for positionedRow in self.columns:
+	    positionedCol = self.columns.index(positionedRow)
+	    if row == positionedRow or col == positionedCol:
+		return False
+	    elif row - col == positionedRow - positionedCol or row + col == positionedRow + positionedCol:
+		return False
+	return True
+
+if __name__ == "__main__":
+    rank = MPI.COMM_WORLD.Get_rank()
+    n = 8
+    Buffer = []
+    queen = NQueenProblem(n)
+    doc = minidom.parse('queenPosition.xml')
+
+    #Sending initial configuration
+    if rank == 0:
+        start = MPI.Wtime()
+     #Slave1
+        position = doc.getElementsByTagName("slave1")[0]
+        pos = int(position.firstChild.data)
+        print('Slave\'1 Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=1,tag=100)
+
+        position = doc.getElementsByTagName("slave2")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=2,tag=200)
+
+        position = doc.getElementsByTagName("slave3")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=3,tag=300)
+
+        position = doc.getElementsByTagName("slave4")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=4,tag=400)
+
+        position = doc.getElementsByTagName("slave5")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=5,tag=500)
+
+        position = doc.getElementsByTagName("slave6")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=6,tag=600)
+
+        position = doc.getElementsByTagName("slave7")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=7,tag=700)
+
+        position = doc.getElementsByTagName("slave8")[0]
+        pos = int(position.firstChild.data)
+        print('Slave1\'s Position :: '+str(pos))
+        Buffer.append(pos)
+        MPI.COMM_WORLD.send(Buffer,dest=8,tag=800)
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Parallel Configuration
+    if rank == 1:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=100)
+        print('\n\n:: :: Rank 1 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 2:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=200)
+        print('\n\n:: :: Rank 2 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 3:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=300)
+        print('\n\n:: :: Rank 3 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 4:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=400)
+        print('\n\n:: :: Rank 4 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 5:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=500)
+        print('\n\n:: :: Rank 5 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 6:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=600)
+        print('\n\n:: :: Rank 6 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 7:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=700)
+        print('\n\n:: :: Rank 7 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    if rank == 8:
+        Buffer = MPI.COMM_WORLD.recv(source=0,tag=800)
+        print('\n\n:: :: Rank 8 (Calculation):: ::\n')
+        queen.place(Buffer[0])
+        queen.chessBoard()
+
+    MPI.COMM_WORLD.Barrier()
+
+    #Gathering and printing output
+    if rank == 0:
+
+        end = MPI.Wtime()
+        timeMaster = end-start
+        print('Time :: '+str(end-start))
+
+        target = open("TimeAnalysis", 'a')
+
+        target.write(str(end-start))
+        target.write("\n")
+
+        target.close()
+
+//queenPosition.xml
+<chessboard>
+	<slave1>0</slave1>
+	<slave2>1</slave2>
+	<slave3>2</slave3>
+	<slave4>3</slave4>
+	<slave5>4</slave5>
+	<slave6>5</slave6>
+	<slave7>6</slave7>
+	<slave8>7</slave8>
+</chessboard>
+//script.py
+
+import os
+import matplotlib.pyplot as plt; plt.rcdefaults()
+import numpy as np
+import matplotlib.pyplot as plt
+
+target = open("TimeAnalysis", 'w')
+target.close()
+
+os.system("mpiexec -np 2 python eightQueenPlot_2.py")
+os.system("mpiexec -np 3 python eightQueenPlot_3.py")
+os.system("mpiexec -np 4 python eightQueenPlot_4.py")
+os.system("mpiexec -np 5 python eightQueenPlot_5.py")
+os.system("mpiexec -np 6 python eightQueenPlot_6.py")
+os.system("mpiexec -np 7 python eightQueenPlot_7.py")
+os.system("mpiexec -np 8 python eightQueenPlot_8.py")
+os.system("mpiexec -np 9 python eightQueenPlot_9.py")
+ 
+# --> , '2nd\nConfig', '3rd\nConfig', '4th\nConfig', '5th\nConfig', '6th\nConfig', '7th\nConfig', '8th\nConfig
+objects = ('1st\nConfig','2nd\nConfig', '3rd\nConfig', '4th\nConfig', '5th\nConfig', '6th\nConfig', '7th\nConfig', '8th\nConfig')
+y_pos = np.arange(len(objects))
+
+target = open("TimeAnalysis", 'r')
+performance = []
+
+performance.append(target.readline())
+performance.append(target.readline())
+performance.append(target.readline())
+performance.append(target.readline())
+performance.append(target.readline())
+performance.append(target.readline())
+performance.append(target.readline())
+performance.append(target.readline())
+
+ 
+plt.bar(y_pos, performance, align='center', alpha=0.3)
+plt.xticks(y_pos, objects)
+plt.ylabel('Time for Execution')
+plt.title('Loaded and Unloaded Cluster')
+ 
+plt.show()

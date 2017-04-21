@@ -1,0 +1,94 @@
+
+//Ameeth Kanawaday 4430
+//Assignment B6 BAI
+
+library(arules)
+groceries <- read.transactions("/home/soham/Coursera/Machine-Learning-with-R-datasets-master/groceries.csv", sep = ",")
+inspect(groceries[1:5])
+itemFrequencyPlot(groceries, support = 0.1)
+itemFrequencyPlot(groceries, topN = 20)
+groceryrules <- apriori(groceries, parameter = list(support =0.006, confidence = 0.25, minlen = 2))
+summary(groceryrules)
+inspect(sort(groceryrules, by = "lift")[1:5])
+write(groceryrules, file = "groceryrules.csv",sep = ",", quote = TRUE, row.names = FALSE)
+
+
+root@localhost:~/A6$ Rscript a6.R 
+Loading required package: Matrix
+
+Attaching package: ‘arules’
+
+The following objects are masked from ‘package:base’:
+
+    abbreviate, write
+
+  items                     
+1 {citrus fruit,            
+   margarine,               
+   ready soups,             
+   semi-finished bread}     
+2 {coffee,                  
+   tropical fruit,          
+   yogurt}                  
+3 {whole milk}              
+4 {cream cheese,            
+   meat spreads,            
+   pip fruit,               
+   yogurt}                  
+5 {condensed milk,          
+   long life bakery product,
+   other vegetables,        
+   whole milk}              
+Apriori
+
+Parameter specification:
+ confidence minval smax arem  aval originalSupport support minlen maxlen target
+       0.25    0.1    1 none FALSE            TRUE   0.006      2     10  rules
+   ext
+ FALSE
+
+Algorithmic control:
+ filter tree heap memopt load sort verbose
+    0.1 TRUE TRUE  FALSE TRUE    2    TRUE
+
+Absolute minimum support count: 59 
+
+set item appearances ...[0 item(s)] done [0.00s].
+set transactions ...[169 item(s), 9835 transaction(s)] done [0.00s].
+sorting and recoding items ... [109 item(s)] done [0.00s].
+creating transaction tree ... done [0.00s].
+checking subsets of size 1 2 3 4 done [0.00s].
+writing ... [463 rule(s)] done [0.00s].
+creating S4 object  ... done [0.00s].
+set of 463 rules
+
+rule length distribution (lhs + rhs):sizes
+  2   3   4 
+150 297  16 
+
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  2.000   2.000   3.000   2.711   3.000   4.000 
+
+summary of quality measures:
+    support           confidence          lift       
+ Min.   :0.006101   Min.   :0.2500   Min.   :0.9932  
+ 1st Qu.:0.007117   1st Qu.:0.2971   1st Qu.:1.6229  
+ Median :0.008744   Median :0.3554   Median :1.9332  
+ Mean   :0.011539   Mean   :0.3786   Mean   :2.0351  
+ 3rd Qu.:0.012303   3rd Qu.:0.4495   3rd Qu.:2.3565  
+ Max.   :0.074835   Max.   :0.6600   Max.   :3.9565  
+
+mining info:
+      data ntransactions support confidence
+ groceries          9835   0.006       0.25
+  lhs                   rhs                      support confidence     lift
+1 {herbs}            => {root vegetables}    0.007015760  0.4312500 3.956477
+2 {berries}          => {whipped/sour cream} 0.009049314  0.2721713 3.796886
+3 {other vegetables,                                                        
+   tropical fruit,                                                          
+   whole milk}       => {root vegetables}    0.007015760  0.4107143 3.768074
+4 {beef,                                                                    
+   other vegetables} => {root vegetables}    0.007930859  0.4020619 3.688692
+5 {other vegetables,                                                        
+   tropical fruit}   => {pip fruit}          0.009456024  0.2634561 3.482649
+root@localhost:~/A6$ 

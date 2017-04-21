@@ -1,0 +1,120 @@
+#Ameeth Kanawaday 4430
+#Assignment B1
+#queens_server.py
+import socket, pickle
+import sys
+import numpy as num_p
+from xml.dom import minidom
+xmlfilename = minidom.parse('data.xml')
+itemlist = xmlfilename.getElementsByTagName('Item')
+
+
+
+s = socket.socket()         # Create a socket object
+host = socket.gethostname() # Get local machine name
+port = 12349               # Reserve a port for your service.
+s.bind((host, port))        # Bind to the port
+
+s.listen(3)                 # Now wait for client connection.
+
+while True:
+	c, addr = s.accept()     # Establish connection with client.
+	print 'Got connection from', addr
+
+	c.send(pickle.dumps(itemlist))
+
+	op = c.recv(10000)
+	print "Soln is "
+	print op
+ 
+	c.close()
+#queens_client.py
+import socket, pickle, sys
+import numpy as num_p
+sys.setrecursionlimit(1000000000)
+placed_first=0
+class nQueens:
+
+    def __init__(self, dimension_of_board):
+        self.dimension = dimension_of_board
+        self.columns = [] * self.dimension
+        self.num_of_places = 0
+        self.num_of_backtracks = 0
+        
+    def placeFirst(self):
+        self.columns.append(placed_first)
+        
+    def place(self,row_start=0):
+        if len(self.columns) == self.dimension:
+            print('Solution found! The board dimension was: ' + str(self.dimension))
+            print(str(self.num_of_places) + ' total places were made.')
+            print(str(self.num_of_backtracks) + ' total backtracks were executed.')
+            print(self.columns)
+            return self.columns
+        else:
+            for row in range(row_start, self.dimension):
+               
+                if self.isSafe(len(self.columns), row) is True:
+                    self.columns.append(row)
+                    self.num_of_places += 1
+                    return self.place()
+            else:
+                row_last = self.columns.pop()
+                self.num_of_backtracks += 1
+                return self.place(row_start=row_last + 1)
+
+    def isSafe(self, col, row):
+        for row_threat in self.columns:
+            col_threat = self.columns.index(row_threat)
+            if row == row_threat or col == self.columns.index(row_threat):
+                return False
+            elif row_threat + col_threat == row + col or row_threat - col_threat == row - col:
+                return False
+        return True
+n = 8
+HOST = socket.gethostname()
+PORT = 12349
+s1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s1.connect((HOST, PORT))
+data = s1.recv(10000)
+itemlist = pickle.loads(data) 
+dataList = []
+for s in itemlist:
+    dataList.append(s.getAttribute("index").encode("utf-8"))
+print dataList
+for s in dataList:
+    if(s!=' '):
+        placed_first=int(s)
+        break
+print "First queen placed in first row at: ",placed_first
+queens = nQueens(8)
+queens.placeFirst()
+queens.place(0)
+# convert board to numpy array for pretty printing
+board = num_p.array([['*'] * n] * n)
+for queen in queens.columns:
+    board[queens.columns.index(queen), queen] = 'Q'
+s1.send(board)
+
+#### Output ####
+#server side:
+[pict@ARCH_pict B1]$ python2 queens_server.py 
+Got connection from ('192.168.6.33', 47814)
+Soln is 
+Q*******
+****Q***
+*******Q
+*****Q**
+**Q*****
+******Q*
+*Q******
+***Q****
+#client side:
+[pict@ARCH_pict B1]$ python2 queens_client.py
+['0', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+First queen placed in first row at:  0
+Solution found! The board dimension was: 8
+112 total places were made.
+105 total backtracks were executed.
+[0, 4, 7, 5, 2, 6, 1, 3]
+[pict@ARCH_pict B1]$ 
